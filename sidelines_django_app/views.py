@@ -1,6 +1,8 @@
 from django.contrib.auth.models import User
 from rest_framework import status
 from rest_framework.authtoken.models import Token
+from rest_framework.authentication import TokenAuthentication
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
@@ -48,27 +50,24 @@ class UserRecordView(APIView):
 
 
 class FriendRequestView(APIView):
-    def get(self, request, profile_id, request_type):
-        try:
-            profile = Profile.objects.get(pk=profile_id)
-        except Profile.DoesNotExist:
-            return Response(status=status.HTTP_404_NOT_FOUND)
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, request_type=None):
+        profile = request.user.profile
 
         if request_type == 'sent':
             friend_requests = FriendRequest.objects.filter(from_profile=profile)
         elif request_type == 'received':
             friend_requests = FriendRequest.objects.filter(to_profile=profile)
         else:
-            return Response(status=status.HTTP_400_BAD_REQUEST)
+            return Response({'detail': 'Invalid request type.'}, status=status.HTTP_400_BAD_REQUEST)
 
         serializer = FriendRequestSerializer(friend_requests, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
-    def post(self, request, profile_id):
-        try:
-            from_profile = Profile.objects.get(pk=profile_id)
-        except Profile.DoesNotExist:
-            return Response(status=status.HTTP_404_NOT_FOUND)
+    def post(self, request):
+        from_profile = request.user.profile
 
         to_profile_id = request.data.get('to_profile')
         try:
@@ -95,27 +94,31 @@ class FriendRequestView(APIView):
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
 
-class AcceptFriendRequestView(APIView):
-    def post(self, request, profile_id, friend_request_id):
-        try:
-            profile = Profile.objects.get(pk=profile_id)
-            friend_request = FriendRequest.objects.get(pk=friend_request_id, to_profile=profile)
-            friend_request.accept()
-            return Response(status=status.HTTP_200_OK)
-        except Profile.DoesNotExist:
-            return Response(status=status.HTTP_404_NOT_FOUND)
-        except FriendRequest.DoesNotExist:
-            return Response(status=status.HTTP_404_NOT_FOUND)
+class FriendRequestActionView(APIView):
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]
 
-
-class IgnoreFriendRequestView(APIView):
-    def post(self, request, profile_id, friend_request_id):
+    def post(self, request, friend_request_id, action):
         try:
-            profile = Profile.objects.get(pk=profile_id)
-            friend_request = FriendRequest.objects.get(pk=friend_request_id, to_profile=profile)
-            friend_request.ignore()
+            friend_request = FriendRequest.objects.get(pk=friend_request_id)
+            if action == 'accept':
+                if friend_request.to_profile.user != request.user:
+                    return Response({'detail': 'You can only accept friend requests sent to you.'},
+                                    status=status.HTTP_403_FORBIDDEN)
+                friend_request.accept()
+            elif action == 'ignore':
+                if friend_request.to_profile.user != request.user:
+                    return Response({'detail': 'You can only ignore friend requests sent to you.'},
+                                    status=status.HTTP_403_FORBIDDEN)
+                friend_request.ignore()
+            elif action == 'withdraw':
+                if friend_request.from_profile.user != request.user:
+                    return Response({'detail': 'You can only withdraw friend requests sent by you.'},
+                                    status=status.HTTP_403_FORBIDDEN)
+                friend_request.delete()
+            else:
+                return Response({'detail': 'Invalid action.'}, status=status.HTTP_400_BAD_REQUEST)
+
             return Response(status=status.HTTP_200_OK)
-        except Profile.DoesNotExist:
-            return Response(status=status.HTTP_404_NOT_FOUND)
         except FriendRequest.DoesNotExist:
             return Response(status=status.HTTP_404_NOT_FOUND)
