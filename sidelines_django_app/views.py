@@ -11,21 +11,36 @@ from .serializers import UserSerializer
 class UserRecordView(APIView):
     permission_classes = []
 
-    def get(self, format=None):
+    @staticmethod
+    def get(request, user_id=None):
+        if user_id is not None:
+            try:
+                user = User.objects.get(pk=user_id)
+                serializer = UserSerializer(user)
+                return Response(serializer.data)
+            except User.DoesNotExist:
+                return Response(status=status.HTTP_404_NOT_FOUND)
+
         users = User.objects.all()
         serializer = UserSerializer(users, many=True)
         return Response(serializer.data)
 
-    def post(self, request):
+    @staticmethod
+    def post(request):
         serializer = UserSerializer(data=request.data)
         if serializer.is_valid():
             user = serializer.save()
 
             token, created = Token.objects.get_or_create(user=user)
 
-            return Response({
-                'token': token.key,
-                'user_id': user.id,
-                'username': user.username
-            }, status=status.HTTP_201_CREATED)
+            return Response({'token': token.key}, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    @staticmethod
+    def delete(request, user_id):
+        try:
+            user = User.objects.get(id=user_id)
+            user.delete()
+            return Response(status=status.HTTP_204_NO_CONTENT)
+        except User.DoesNotExist:
+            return Response(status=status.HTTP_404_NOT_FOUND)

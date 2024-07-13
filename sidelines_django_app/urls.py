@@ -3,5 +3,6 @@ from .views import UserRecordView
 
 app_name = 'api'
 urlpatterns = [
-    path('user/', UserRecordView.as_view(), name='users'),
+    path('users/', UserRecordView.as_view(), name='user-list'),
+    path('users/<int:user_id>/', UserRecordView.as_view(), name='user-detail'),
 ]
