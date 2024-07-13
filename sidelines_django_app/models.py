@@ -16,4 +16,13 @@ class Profile(models.Model):
     overall_rating = models.FloatField(default=0.0)
     position = models.CharField(max_length=10, choices=Positions.choices, default=Positions.ANY)
     kit_number = models.IntegerField(default=10, validators=[MinValueValidator(1), MaxValueValidator(99)])
+    friends = models.ManyToManyField('self', blank=True)
+    pending_requests = models.ManyToManyField('self', symmetrical=False, through='FriendRequest', related_name='received_requests')
     join_date = models.DateField(auto_now_add=True)
+
+
+class FriendRequest(models.Model):
+    from_profile = models.ForeignKey(Profile, related_name='sent_requests', on_delete=models.CASCADE)
+    to_profile = models.ForeignKey(Profile, related_name='received_requests', on_delete=models.CASCADE)
+    is_accepted = models.BooleanField(default=False)
+    created_at = models.DateTimeField(auto_now_add=True)

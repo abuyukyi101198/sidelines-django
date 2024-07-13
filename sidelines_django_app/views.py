@@ -4,7 +4,8 @@ from rest_framework.authtoken.models import Token
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from .serializers import UserSerializer
+from .models import Profile, FriendRequest
+from .serializers import UserSerializer, ProfileSerializer, FriendRequestSerializer
 
 
 # Create your views here.
@@ -43,4 +44,71 @@ class UserRecordView(APIView):
             user.delete()
             return Response(status=status.HTTP_204_NO_CONTENT)
         except User.DoesNotExist:
+            return Response(status=status.HTTP_404_NOT_FOUND)
+
+
+class FriendListView(APIView):
+    def get(self, request, profile_id):
+        try:
+            profile = Profile.objects.get(pk=profile_id)
+            friends = profile.friends.all()
+            serializer = ProfileSerializer(friends, many=True)
+            return Response(serializer.data)
+        except Profile.DoesNotExist:
+            return Response(status=status.HTTP_404_NOT_FOUND)
+
+    def post(self, request, profile_id):
+        try:
+            profile = Profile.objects.get(pk=profile_id)
+            friend_id = request.data.get('friend_id')
+            friend = Profile.objects.get(pk=friend_id)
+            profile.friends.add(friend)
+            return Response(status=status.HTTP_201_CREATED)
+        except Profile.DoesNotExist:
+            return Response(status=status.HTTP_404_NOT_FOUND)
+
+    def delete(self, request, profile_id, friend_id):
+        try:
+            profile = Profile.objects.get(pk=profile_id)
+            friend = Profile.objects.get(pk=friend_id)
+            profile.friends.remove(friend)
+            return Response(status=status.HTTP_204_NO_CONTENT)
+        except Profile.DoesNotExist:
+            return Response(status=status.HTTP_404_NOT_FOUND)
+
+
+class FriendRequestListView(APIView):
+    def post(self, request, from_profile_id, to_profile_id):
+        try:
+            from_profile = Profile.objects.get(pk=from_profile_id)
+            to_profile = Profile.objects.get(pk=to_profile_id)
+
+            if from_profile == to_profile:
+                return Response(status=status.HTTP_400_BAD_REQUEST)
+
+            existing_request = FriendRequest.objects.filter(from_profile=from_profile, to_profile=to_profile)
+            if existing_request.exists():
+                return Response(status=status.HTTP_400_BAD_REQUEST)
+
+            friend_request = FriendRequest.objects.create(from_profile=from_profile, to_profile=to_profile)
+            serializer = FriendRequestSerializer(friend_request)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        except Profile.DoesNotExist:
+            return Response(status=status.HTTP_404_NOT_FOUND)
+
+    def put(self, request, request_id):
+        try:
+            friend_request = FriendRequest.objects.get(pk=request_id)
+            friend_request.is_accepted = True
+            friend_request.save()
+            return Response(status=status.HTTP_200_OK)
+        except FriendRequest.DoesNotExist:
+            return Response(status=status.HTTP_404_NOT_FOUND)
+
+    def delete(self, request, request_id):
+        try:
+            friend_request = FriendRequest.objects.get(pk=request_id)
+            friend_request.delete()
+            return Response(status=status.HTTP_204_NO_CONTENT)
+        except FriendRequest.DoesNotExist:
             return Response(status=status.HTTP_404_NOT_FOUND)

@@ -1,13 +1,22 @@
 from django.contrib.auth.models import User
 from rest_framework import serializers
 from rest_framework.validators import UniqueValidator, UniqueTogetherValidator
-from .models import Profile
+from .models import Profile, FriendRequest
+
+
+class FriendRequestSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = FriendRequest
+        fields = ('id', 'from_profile', 'to_profile', 'is_accepted', 'created_at')
 
 
 class ProfileSerializer(serializers.ModelSerializer):
+    friends = serializers.PrimaryKeyRelatedField(many=True, queryset=Profile.objects.all(), required=False)
+    pending_requests = FriendRequestSerializer(many=True, read_only=True)
+
     class Meta:
         model = Profile
-        fields = ('overall_rating', 'position', 'kit_number', 'join_date',)
+        fields = ('overall_rating', 'position', 'kit_number', 'friends', 'join_date',)
         read_only_fields = ('overall_rating', 'join_date',)
 
 
