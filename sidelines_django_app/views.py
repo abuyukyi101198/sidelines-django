@@ -5,7 +5,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from .models import Profile, FriendRequest
-from .serializers import UserSerializer, ProfileSerializer, FriendRequestSerializer
+from .serializers import UserSerializer, FriendRequestSerializer
 
 
 # Create your views here.
@@ -18,13 +18,13 @@ class UserRecordView(APIView):
             try:
                 user = User.objects.get(pk=user_id)
                 serializer = UserSerializer(user)
-                return Response(serializer.data)
+                return Response(serializer.data, status=status.HTTP_200_OK)
             except User.DoesNotExist:
                 return Response(status=status.HTTP_404_NOT_FOUND)
 
         users = User.objects.all()
         serializer = UserSerializer(users, many=True)
-        return Response(serializer.data)
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
     @staticmethod
     def post(request):
@@ -47,68 +47,75 @@ class UserRecordView(APIView):
             return Response(status=status.HTTP_404_NOT_FOUND)
 
 
-class FriendListView(APIView):
-    def get(self, request, profile_id):
+class FriendRequestView(APIView):
+    def get(self, request, profile_id, request_type):
         try:
             profile = Profile.objects.get(pk=profile_id)
-            friends = profile.friends.all()
-            serializer = ProfileSerializer(friends, many=True)
-            return Response(serializer.data)
         except Profile.DoesNotExist:
             return Response(status=status.HTTP_404_NOT_FOUND)
+
+        if request_type == 'sent':
+            friend_requests = FriendRequest.objects.filter(from_profile=profile)
+        elif request_type == 'received':
+            friend_requests = FriendRequest.objects.filter(to_profile=profile)
+        else:
+            return Response(status=status.HTTP_400_BAD_REQUEST)
+
+        serializer = FriendRequestSerializer(friend_requests, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
     def post(self, request, profile_id):
         try:
-            profile = Profile.objects.get(pk=profile_id)
-            friend_id = request.data.get('friend_id')
-            friend = Profile.objects.get(pk=friend_id)
-            profile.friends.add(friend)
-            return Response(status=status.HTTP_201_CREATED)
+            from_profile = Profile.objects.get(pk=profile_id)
         except Profile.DoesNotExist:
             return Response(status=status.HTTP_404_NOT_FOUND)
 
-    def delete(self, request, profile_id, friend_id):
+        to_profile_id = request.data.get('to_profile')
         try:
-            profile = Profile.objects.get(pk=profile_id)
-            friend = Profile.objects.get(pk=friend_id)
-            profile.friends.remove(friend)
-            return Response(status=status.HTTP_204_NO_CONTENT)
-        except Profile.DoesNotExist:
-            return Response(status=status.HTTP_404_NOT_FOUND)
-
-
-class FriendRequestListView(APIView):
-    def post(self, request, from_profile_id, to_profile_id):
-        try:
-            from_profile = Profile.objects.get(pk=from_profile_id)
             to_profile = Profile.objects.get(pk=to_profile_id)
+        except Profile.DoesNotExist:
+            return Response({'detail': 'Recipient profile not found.'}, status=status.HTTP_404_NOT_FOUND)
 
-            if from_profile == to_profile:
-                return Response(status=status.HTTP_400_BAD_REQUEST)
+        if from_profile == to_profile:
+            return Response({'detail': 'Cannot send a friend request to yourself.'}, status=status.HTTP_400_BAD_REQUEST)
 
-            existing_request = FriendRequest.objects.filter(from_profile=from_profile, to_profile=to_profile)
-            if existing_request.exists():
-                return Response(status=status.HTTP_400_BAD_REQUEST)
+        if FriendRequest.objects.filter(from_profile=from_profile, to_profile=to_profile).exists():
+            return Response({'detail': 'Friend request already sent.'}, status=status.HTTP_400_BAD_REQUEST)
 
-            friend_request = FriendRequest.objects.create(from_profile=from_profile, to_profile=to_profile)
-            serializer = FriendRequestSerializer(friend_request)
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        if FriendRequest.objects.filter(from_profile=to_profile, to_profile=from_profile).exists():
+            return Response({'detail': 'Friend request already received from this user.'},
+                            status=status.HTTP_400_BAD_REQUEST)
+
+        if to_profile in from_profile.friends.all():
+            return Response({'detail': 'This user is already your friend.'}, status=status.HTTP_400_BAD_REQUEST)
+
+        friend_request = FriendRequest(from_profile=from_profile, to_profile=to_profile)
+        friend_request.save()
+        serializer = FriendRequestSerializer(friend_request)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+
+class AcceptFriendRequestView(APIView):
+    def post(self, request, profile_id, friend_request_id):
+        try:
+            profile = Profile.objects.get(pk=profile_id)
+            friend_request = FriendRequest.objects.get(pk=friend_request_id, to_profile=profile)
+            friend_request.accept()
+            return Response(status=status.HTTP_200_OK)
         except Profile.DoesNotExist:
             return Response(status=status.HTTP_404_NOT_FOUND)
-
-    def put(self, request, request_id):
-        try:
-            friend_request = FriendRequest.objects.get(pk=request_id)
-            friend_request.is_accepted = True
-            friend_request.save()
-            return Response(status=status.HTTP_200_OK)
         except FriendRequest.DoesNotExist:
             return Response(status=status.HTTP_404_NOT_FOUND)
 
-    def delete(self, request, request_id):
+
+class IgnoreFriendRequestView(APIView):
+    def post(self, request, profile_id, friend_request_id):
         try:
-            friend_request = FriendRequest.objects.get(pk=request_id)
-            friend_request.delete()
-            return Response(status=status.HTTP_204_NO_CONTENT)
+            profile = Profile.objects.get(pk=profile_id)
+            friend_request = FriendRequest.objects.get(pk=friend_request_id, to_profile=profile)
+            friend_request.ignore()
+            return Response(status=status.HTTP_200_OK)
+        except Profile.DoesNotExist:
+            return Response(status=status.HTTP_404_NOT_FOUND)
         except FriendRequest.DoesNotExist:
             return Response(status=status.HTTP_404_NOT_FOUND)

@@ -7,12 +7,11 @@ from .models import Profile, FriendRequest
 class FriendRequestSerializer(serializers.ModelSerializer):
     class Meta:
         model = FriendRequest
-        fields = ('id', 'from_profile', 'to_profile', 'is_accepted', 'created_at')
+        fields = ('id', 'from_profile', 'to_profile', 'created_at')
 
 
 class ProfileSerializer(serializers.ModelSerializer):
     friends = serializers.PrimaryKeyRelatedField(many=True, queryset=Profile.objects.all(), required=False)
-    pending_requests = FriendRequestSerializer(many=True, read_only=True)
 
     class Meta:
         model = Profile
