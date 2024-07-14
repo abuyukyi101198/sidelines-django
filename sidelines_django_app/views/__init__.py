@@ -4,3 +4,6 @@ from .UserRecordView import UserRecordView
 from .TeamView import TeamView
 from .TeamInvitationView import TeamInvitationView
 from .TeamInvitationActionView import TeamInvitationActionView
+from .LeaveTeamView import LeaveTeamView
+from .PromoteDemoteMemberView import PromoteDemoteMemberView
+from .RemoveMemberView import RemoveMemberView
