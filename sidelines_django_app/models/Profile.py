@@ -16,4 +16,7 @@ class Profile(models.Model):
     position = models.CharField(max_length=10, choices=Positions.choices, default=Positions.ANY)
     kit_number = models.IntegerField(default=10, validators=[MinValueValidator(1), MaxValueValidator(99)])
     friends = models.ManyToManyField('self', symmetrical=True)
+    goals = models.IntegerField(default=0)
+    assists = models.IntegerField(default=0)
+    mvp = models.IntegerField(default=0)
     join_date = models.DateField(auto_now_add=True)
