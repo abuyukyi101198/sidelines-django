@@ -8,5 +8,5 @@ class ProfileSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Profile
-        fields = ('overall_rating', 'position', 'kit_number', 'friends', 'join_date',)
+        fields = ('overall_rating', 'position', 'kit_number', 'friends', 'teams', 'admin_teams', 'join_date',)
         read_only_fields = ('overall_rating', 'join_date',)
