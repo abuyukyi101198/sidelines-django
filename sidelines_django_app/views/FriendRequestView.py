@@ -1,4 +1,5 @@
 from rest_framework import status
+from rest_framework.decorators import api_view
 from rest_framework.response import Response
 
 from sidelines_django_app.models import FriendRequest, Profile
@@ -38,3 +39,19 @@ class FriendRequestView(BaseInvitationView):
         if to_profile in from_profile.friends.all():
             return 'This user is already your friend.'
         return None
+
+    @staticmethod
+    @api_view(['DELETE'])
+    def unfriend(request, profile_id):
+        profile = request.user.profile
+
+        try:
+            other_profile = Profile.objects.get(pk=profile_id)
+        except Profile.DoesNotExist:
+            return Response({'detail': 'Profile not found.'}, status=status.HTTP_404_NOT_FOUND)
+
+        if other_profile not in profile.friends.all():
+            return Response({'detail': 'This user is not in your friends list.'}, status=status.HTTP_400_BAD_REQUEST)
+
+        profile.unfriend(other_profile)
+        return Response({'detail': 'Unfriended successfully.'}, status=status.HTTP_200_OK)

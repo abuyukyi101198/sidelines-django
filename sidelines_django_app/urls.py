@@ -11,6 +11,8 @@ urlpatterns = [
     path('friend-requests/<str:request_type>/', FriendRequestView.as_view(), name='friend-request-list'),
     path('friend-requests/<int:request_id>/<str:action>/', FriendRequestView.as_view(), name='friend-request-action'),
 
+    path('friend-requests/unfriend/<int:profile_id>/', FriendRequestView.unfriend, name='unfriend'),
+
     path('team-invitations/', TeamInvitationView.as_view(), name='create-team-invitation'),
     path('team-invitations/<int:request_id>/', TeamInvitationView.as_view(), name='team-invitation-detail'),
     path('team-invitations/<str:request_type>/', TeamInvitationView.as_view(), name='team-invitation-list'),
