@@ -1,10 +1,12 @@
 from rest_framework import serializers
 
-from sidelines_django_app.models import Profile
+from sidelines_django_app.models import Profile, Team
 
 
 class ProfileSerializer(serializers.ModelSerializer):
     friends = serializers.PrimaryKeyRelatedField(many=True, queryset=Profile.objects.all(), required=False)
+    teams = serializers.PrimaryKeyRelatedField(many=True, queryset=Team.objects.all(), required=False)
+    admin_teams = serializers.PrimaryKeyRelatedField(many=True, queryset=Team.objects.all(), required=False)
 
     class Meta:
         model = Profile
