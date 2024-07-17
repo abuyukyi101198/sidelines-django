@@ -20,7 +20,7 @@ urlpatterns = [
 
     path('teams/', TeamView.as_view(), name='team-list'),
     path('teams/<int:team_id>/', TeamView.as_view(), name='team-detail'),
-    path('teams/<int:team_id>/leave/', LeaveTeamView.as_view(), name='leave-team'),
-    path('teams/<int:team_id>/member/<int:member_id>/<str:action>/', PromoteDemoteMemberView.as_view(), name='promote-demote-member'),
-    path('teams/<int:team_id>/remove-member/<int:member_id>/', RemoveMemberView.as_view(), name='remove-member'),
+    path('teams/<int:team_id>/leave/', TeamView.leave, name='leave-team'),
+    path('teams/<int:team_id>/remove-member/<int:member_id>/', TeamView.remove_member, name='remove-member'),
+    path('teams/<int:team_id>/member/<int:member_id>/<str:action>/', TeamView.promote_or_demote_member, name='promote-demote-member'),
 ]
