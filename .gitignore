@@ -88,3 +88,6 @@ db.sqlite3
 
 # IDEA
 .idea
+
+# ChatGPT
+prompt.txt
