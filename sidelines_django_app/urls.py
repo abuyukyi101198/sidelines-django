@@ -23,4 +23,9 @@ urlpatterns = [
     path('teams/<int:team_id>/leave/', TeamView.leave, name='leave-team'),
     path('teams/<int:team_id>/remove-member/<int:member_id>/', TeamView.remove_member, name='remove-member'),
     path('teams/<int:team_id>/member/<int:member_id>/<str:action>/', TeamView.promote_or_demote_member, name='promote-demote-member'),
+
+    path('match-invitations/', MatchInvitationView.as_view(), name='create-match-invitation'),
+    path('match-invitations/<int:request_id>/', MatchInvitationView.as_view(), name='match-invitation-detail'),
+    path('match-invitations/<str:request_type>/', MatchInvitationView.as_view(), name='match-invitation-list'),
+    path('match-invitations/<int:request_id>/<str:action>/', MatchInvitationView.as_view(), name='match-invitation-action'),
 ]
