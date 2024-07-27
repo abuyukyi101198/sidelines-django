@@ -10,3 +10,10 @@ class MatchInvitation(models.Model):
     team_size = models.IntegerField(default=7)
     location = models.CharField(max_length=255)
     date_time = models.DateTimeField()
+
+    def accept(self):
+        self.admin_approved = True
+        self.save()
+
+    def ignore(self):
+        self.delete()
