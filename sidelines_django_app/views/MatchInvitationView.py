@@ -1,7 +1,8 @@
 from rest_framework import status
+from rest_framework.decorators import api_view
 from rest_framework.response import Response
 
-from sidelines_django_app.models import MatchInvitation, Team
+from sidelines_django_app.models import MatchInvitation, Team, MatchVote
 from sidelines_django_app.serializers import MatchInvitationSerializer
 from sidelines_django_app.views.BaseInvitationView import BaseInvitationView
 
@@ -47,3 +48,30 @@ class MatchInvitationView(BaseInvitationView):
         elif profile not in from_team.admins.all():
             return 'Only admins can send match invitations.'
         return None
+
+    @staticmethod
+    @api_view(['POST'])
+    def vote(request, invitation_id):
+        profile = request.user.profile
+        vote_response = request.data.get('vote')
+
+        if vote_response not in dict(MatchVote.RESPONSE_CHOICES):
+            return Response(status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            invitation = MatchInvitation.objects.get(pk=invitation_id)
+        except MatchInvitation.DoesNotExist:
+            return Response(status=status.HTTP_404_NOT_FOUND)
+
+        if not invitation.admin_approved:
+            return Response(status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            match_vote = MatchVote.objects.get(invitation=invitation, profile=profile)
+        except MatchVote.DoesNotExist:
+            match_vote = MatchVote(invitation=invitation, profile=profile)
+
+        match_vote.response = vote_response
+        match_vote.save()
+
+        return Response(status=status.HTTP_200_OK)
