@@ -6,3 +6,4 @@ from .TeamInvitationSerializer import TeamInvitationSerializer
 from .MatchSerializer import MatchSerializer
 from .MatchDetailsSerializer import MatchDetailsSerializer
 from .MatchInvitationSerializer import MatchInvitationSerializer
+from .MatchVoteSerializer import MatchVoteSerializer
