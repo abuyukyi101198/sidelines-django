@@ -4,19 +4,29 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
+from sidelines_django_app.models import Profile, Team
+
 
 class BaseInvitationView(APIView):
     authentication_classes = [TokenAuthentication]
     permission_classes = [IsAuthenticated]
     model = None
     serializer_class = None
+    effect_class = Profile
+    from_field = 'from_profile'
+    to_field = 'to_profile'
 
     def get(self, request, request_type=None, request_id=None):
         if request_id is not None:
             return self.get_single_request(request_id)
 
-        profile = request.user.profile
-        return self.get_all_requests(profile, request_type)
+        if self.effect_class is Profile:
+            target = request.user.profile
+        elif self.effect_class is Team:
+            target = Team.objects.get(pk=request.data.get("team"))
+        else:
+            return Response(status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        return self.get_all_requests(target, request_type)
 
     def get_single_request(self, request_id):
         try:
@@ -26,11 +36,14 @@ class BaseInvitationView(APIView):
         except self.model.DoesNotExist:
             return Response(status=status.HTTP_404_NOT_FOUND)
 
-    def get_all_requests(self, profile, request_type):
+    def get_all_requests(self, target, request_type):
+        from_filter = {self.from_field: target}
+        to_filter = {self.to_field: target}
+
         if request_type == 'sent':
-            requests = self.model.objects.filter(from_profile=profile)
+            requests = self.model.objects.filter(**from_filter)
         elif request_type == 'received':
-            requests = self.model.objects.filter(to_profile=profile)
+            requests = self.model.objects.filter(**to_filter)
         else:
             return Response({'detail': 'Invalid request type.'}, status=status.HTTP_400_BAD_REQUEST)
 
@@ -44,8 +57,12 @@ class BaseInvitationView(APIView):
         profile = request.user.profile
         try:
             request_obj = self.model.objects.get(pk=request_id)
-            if request_obj.to_profile != profile:
+
+            if self.effect_class is Profile and getattr(request_obj, self.to_field) != profile:
                 return Response({'detail': 'You can only accept/ignore requests sent to you.'},
+                                status=status.HTTP_403_FORBIDDEN)
+            elif self.effect_class is Team and profile not in getattr(request_obj, self.to_field).admins.all():
+                return Response({'detail': 'You can only accept/ignore requests sent to teams you are an admin of.'},
                                 status=status.HTTP_403_FORBIDDEN)
             if action == 'accept':
                 request_obj.accept()
@@ -65,7 +82,10 @@ class BaseInvitationView(APIView):
         except self.model.DoesNotExist:
             return Response({'detail': 'Request not found.'}, status=status.HTTP_404_NOT_FOUND)
 
-        if request_obj.from_profile != profile:
+        if self.effect_class is Profile and getattr(request_obj, self.from_field) != profile:
             return Response({'detail': 'You can only withdraw requests sent by you.'}, status=status.HTTP_403_FORBIDDEN)
+        elif self.effect_class is Team and profile not in getattr(request_obj, self.from_field).admins.all():
+            return Response({'detail': 'You can only withdraw requests sent by your team.'},
+                            status=status.HTTP_403_FORBIDDEN)
         request_obj.delete()
         return Response(status=status.HTTP_200_OK)
