@@ -1,6 +1,8 @@
 from django.contrib.auth.models import User
 from rest_framework import status
+from rest_framework.authentication import TokenAuthentication
 from rest_framework.authtoken.models import Token
+from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
@@ -8,17 +10,21 @@ from sidelines_django_app.serializers import UserSerializer
 
 
 class UserRecordView(APIView):
-    permission_classes = []
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]
 
-    @staticmethod
-    def get(request, user_id=None):
+    def get_permissions(self):
+        if self.request.method == 'POST':
+            return [AllowAny()]
+        return super().get_permissions()
+
+    def get(self, request, user_id=None):
         if user_id is not None:
-            return UserRecordView.get_single_user(user_id)
+            return self.get_single_user(user_id)
 
-        return UserRecordView.get_all_users()
+        return self.get_all_users()
 
-    @staticmethod
-    def get_single_user(user_id):
+    def get_single_user(self, user_id):
         try:
             user = User.objects.get(pk=user_id)
             serializer = UserSerializer(user)
@@ -26,14 +32,12 @@ class UserRecordView(APIView):
         except User.DoesNotExist:
             return Response(status=status.HTTP_404_NOT_FOUND)
 
-    @staticmethod
-    def get_all_users():
+    def get_all_users(self):
         users = User.objects.all()
         serializer = UserSerializer(users, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
-    @staticmethod
-    def post(request):
+    def post(self, request):
         serializer = UserSerializer(data=request.data)
         if serializer.is_valid():
             user = serializer.save()
@@ -41,8 +45,7 @@ class UserRecordView(APIView):
             return Response({'token': token.key}, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-    @staticmethod
-    def delete(request, user_id):
+    def delete(self, request, user_id):
         try:
             user = User.objects.get(id=user_id)
             user.delete()
