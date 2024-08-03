@@ -1,0 +1,1 @@
+from .UserRecordViewTests import UserRecordViewTests
