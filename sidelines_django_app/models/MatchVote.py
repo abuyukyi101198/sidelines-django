@@ -1,6 +1,6 @@
 from django.db import models
 
-from sidelines_django_app.models import MatchInvitation, Profile
+from sidelines_django_app.models import Profile, Match
 
 
 class MatchVote(models.Model):
@@ -9,9 +9,9 @@ class MatchVote(models.Model):
         ('rejected', 'Rejected'),
         ('maybe', 'Maybe'),
     ]
-    invitation = models.ForeignKey(MatchInvitation, related_name='votes', on_delete=models.CASCADE)
+    match = models.ForeignKey(Match, related_name='votes', on_delete=models.CASCADE)
     profile = models.ForeignKey(Profile, on_delete=models.CASCADE)
     response = models.CharField(max_length=10, choices=RESPONSE_CHOICES, default='maybe')
 
     class Meta:
-        unique_together = ('invitation', 'profile')
+        unique_together = ('match', 'profile')

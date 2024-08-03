@@ -29,5 +29,8 @@ urlpatterns = [
     path('match-invitations/<str:request_type>/', MatchInvitationView.as_view(), name='match-invitation-list'),
     path('match-invitations/<int:request_id>/<str:action>/', MatchInvitationView.as_view(), name='match-invitation-action'),
 
-    path('match-invitations/vote/<int:invitation_id>/', MatchInvitationView.vote, name='match-invitation-vote'),
+    path('matches/', MatchView.as_view(), name='match-list'),
+    path('matches/<int:match_id>/', MatchView.as_view(), name='match-detail'),
+
+    path('matches/vote/<int:match_id>/', MatchView.vote, name='vote'),
 ]
