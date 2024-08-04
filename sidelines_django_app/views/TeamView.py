@@ -137,6 +137,10 @@ class TeamView(APIView):
         if profile not in team.members.all():
             return Response(status=status.HTTP_400_BAD_REQUEST)
 
+        if profile in team.admins.all() and team.admins.count() == 1 and team.members.count() > 1:
+            return Response({'detail': 'You cannot leave the team as the last admin.'},
+                            status=status.HTTP_403_FORBIDDEN)
+
         team.remove_member(profile)
 
         return Response(status=status.HTTP_200_OK)
