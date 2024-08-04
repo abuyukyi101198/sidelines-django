@@ -16,6 +16,7 @@ class UserRecordViewTests(APITestCase):
     def setUp(self):
         self.client = APIClient()
         self.user = User.objects.create_user(username='testuser', email='test@example.com', password='testpassword')
+        self.profile = Profile.objects.create(user=self.user)
         self.token = Token.objects.create(user=self.user)
         self.client.credentials(HTTP_AUTHORIZATION='Token ' + self.token.key)
         self.url_list = reverse('api:user-list')
@@ -28,6 +29,7 @@ class UserRecordViewTests(APITestCase):
         logger.debug('Response: %s', response.data)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(response.data), User.objects.count())
+        self.assertEqual(User.objects.count(), Profile.objects.count())
         logger.info('test_get_all_users passed')
 
     def test_get_single_user(self):
@@ -94,7 +96,7 @@ class UserRecordViewTests(APITestCase):
 
     def test_delete_user_not_found(self):
         logger.info('Testing delete_user_not_found')
-        response = self.client.delete(reverse('api:user-detail', kwargs={'user_id': 999}))  # Non-existent user
+        response = self.client.delete(reverse('api:user-detail', kwargs={'user_id': 999}))
         logger.debug('Response: %s', response.data)
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
         logger.info('test_delete_user_not_found passed')

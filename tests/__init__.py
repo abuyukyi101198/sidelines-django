@@ -1,1 +1,2 @@
 from .UserRecordViewTests import UserRecordViewTests
+from .FriendRequestViewTests import FriendRequestViewTests
