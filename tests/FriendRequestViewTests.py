@@ -36,6 +36,50 @@ class FriendRequestViewTests(APITestCase):
         logger.info('Authenticating user with token: %s', token)
         self.client.credentials(HTTP_AUTHORIZATION='Token ' + token)
 
+    def test_get_single_friend_request(self):
+        logger.info('Testing get_single_friend_request')
+        self.authenticate(self.token1.key)
+
+        friend_request = FriendRequest.objects.create(from_profile=self.profile1, to_profile=self.profile2)
+        url = reverse('api:friend-request-detail', kwargs={'request_id': friend_request.pk})
+
+        response = self.client.get(url)
+        logger.debug('Response: %s', response.data)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data['from_profile'], self.profile1.pk)
+        self.assertEqual(response.data['to_profile'], self.profile2.pk)
+        logger.info('test_get_single_friend_request passed')
+
+    def test_get_sent_friend_requests(self):
+        logger.info('Testing get_sent_friend_requests')
+        self.authenticate(self.token1.key)
+
+        FriendRequest.objects.create(from_profile=self.profile1, to_profile=self.profile2)
+        FriendRequest.objects.create(from_profile=self.profile2, to_profile=self.profile3)
+        FriendRequest.objects.create(from_profile=self.profile1, to_profile=self.profile3)
+        url = reverse('api:friend-request-list', kwargs={'request_type': 'sent'})
+
+        response = self.client.get(url)
+        logger.debug('Response: %s', response.data)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(response.data), self.profile1.sent_requests.count())
+        logger.info('test_get_sent_friend_requests passed')
+
+    def test_get_received_friend_requests(self):
+        logger.info('Testing get_received_friend_requests')
+        self.authenticate(self.token1.key)
+
+        FriendRequest.objects.create(from_profile=self.profile1, to_profile=self.profile2)
+        FriendRequest.objects.create(from_profile=self.profile2, to_profile=self.profile3)
+        FriendRequest.objects.create(from_profile=self.profile1, to_profile=self.profile3)
+        url = reverse('api:friend-request-list', kwargs={'request_type': 'received'})
+
+        response = self.client.get(url)
+        logger.debug('Response: %s', response.data)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(response.data), self.profile1.received_requests.count())
+        logger.info('test_get_received_friend_requests passed')
+
     def test_send_friend_request(self):
         logger.info('Testing send_friend_request')
         self.authenticate(self.token1.key)
@@ -87,6 +131,7 @@ class FriendRequestViewTests(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertIn(self.profile2, self.profile1.friends.all())
         self.assertIn(self.profile1, self.profile2.friends.all())
+        self.assertFalse(FriendRequest.objects.filter(from_profile=self.profile1, to_profile=self.profile2).exists())
         logger.info('test_accept_friend_request passed')
 
     def test_ignore_friend_request(self):
@@ -102,6 +147,7 @@ class FriendRequestViewTests(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertNotIn(self.profile2, self.profile1.friends.all())
         self.assertNotIn(self.profile1, self.profile2.friends.all())
+        self.assertFalse(FriendRequest.objects.filter(from_profile=self.profile1, to_profile=self.profile2).exists())
         logger.info('test_ignore_friend_request passed')
 
     def test_withdraw_friend_request(self):
