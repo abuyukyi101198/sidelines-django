@@ -31,6 +31,8 @@ class TeamInvitationView(BaseInvitationView):
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
     def validate_request(self, from_profile, to_profile, team):
+        if from_profile not in team.admins.all():
+            return 'Only admins can send team invitations.'
         if from_profile == to_profile:
             return 'Cannot send a team invitation to yourself.'
         if self.model.objects.filter(from_profile=from_profile, to_profile=to_profile).exists():
