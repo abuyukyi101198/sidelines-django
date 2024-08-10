@@ -23,7 +23,8 @@ class BaseInvitationView(APIView):
         if self.effect_class is Profile:
             target = request.user.profile
         elif self.effect_class is Team:
-            target = Team.objects.get(pk=request.data.get("team"))
+            team_id = request.GET.get("team")
+            target = Team.objects.get(pk=team_id)
         else:
             return Response(status=status.HTTP_500_INTERNAL_SERVER_ERROR)
         return self.get_all_requests(target, request_type)
