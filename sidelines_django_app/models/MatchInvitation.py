@@ -15,8 +15,8 @@ class MatchInvitation(models.Model):
         self.admin_approved = True
         self.save()
         Match.objects.create(
-            from_team=self.from_team,
-            to_team=self.to_team,
+            home_team=self.from_team,
+            away_team=self.to_team,
             team_size=self.team_size,
             location=self.location,
             date_time=self.date_time
