@@ -6,7 +6,7 @@ from rest_framework import status
 from rest_framework.authtoken.models import Token
 from rest_framework.test import APIClient, APITestCase
 
-from sidelines_django_app.models import Profile, Team, MatchInvitation
+from sidelines_django_app.models import Profile, Team, MatchInvitation, Match
 
 logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)
@@ -145,8 +145,9 @@ class MatchInvitationViewTests(APITestCase):
         logger.debug('Response: %s', response.data)
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        # Assuming logic to convert invitation to a match record
         self.assertFalse(MatchInvitation.objects.filter(pk=match_invitation.pk).exists())
+        self.assertTrue(Match.objects.filter(home_team=self.team1, away_team=self.team2,
+                                             location='Test Location', date_time='2024-08-10T15:00:00Z'))
         logger.info('test_accept_match_invitation passed')
 
     def test_ignore_match_invitation(self):
