@@ -2,3 +2,4 @@ from .UserRecordViewTests import UserRecordViewTests
 from .FriendRequestViewTests import FriendRequestViewTests
 from .TeamViewTests import TeamViewTests
 from .TeamInvitationViewTests import TeamInvitationViewTests
+from .MatchInvitationViewTests import MatchInvitationViewTests
