@@ -49,9 +49,6 @@ class MatchView(APIView):
         except Match.DoesNotExist:
             return Response(status=status.HTTP_404_NOT_FOUND)
 
-        if not match.admin_approved:
-            return Response(status=status.HTTP_400_BAD_REQUEST)
-
         try:
             match_vote = MatchVote.objects.get(match=match, profile=profile)
         except MatchVote.DoesNotExist:
