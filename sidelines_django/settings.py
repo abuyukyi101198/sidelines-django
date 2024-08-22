@@ -104,6 +104,13 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
+# Authentication backend
+
+AUTHENTICATION_BACKENDS = [
+    'sidelines_django_app.authentication.UsernameOrEmailBackend',
+    'django.contrib.auth.backends.ModelBackend',
+]
+
 # REST Framework
 # https://dev.to/amartyadev/flutter-app-authentication-with-django-backend-1-21cp
 
