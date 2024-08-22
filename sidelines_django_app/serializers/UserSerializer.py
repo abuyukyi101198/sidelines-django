@@ -22,11 +22,17 @@ class UserSerializer(serializers.ModelSerializer):
             username=validated_data['username'],
             first_name=validated_data['first_name'],
             last_name=validated_data['last_name'],
-            email=validated_data['email'],
-            password=validated_data['password']
+            email=validated_data['email']
         )
+        user.set_password(validated_data['password'])
+        user.save()
         Profile.objects.create(user=user, **profile_data)
         return user
+
+    def update(self, instance, validated_data):
+        if 'password' in validated_data:
+            instance.set_password(validated_data['password'])
+        return super().update(instance, validated_data)
 
     class Meta:
         model = User
@@ -39,6 +45,7 @@ class UserSerializer(serializers.ModelSerializer):
             'password',
             'profile',
         )
+        extra_kwargs = {'password': {'write_only': True}}
         validators = [
             UniqueTogetherValidator(
                 queryset=User.objects.all(),
