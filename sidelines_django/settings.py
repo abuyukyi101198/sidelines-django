@@ -120,7 +120,16 @@ REST_FRAMEWORK = {
     ),
     'DEFAULT_PERMISSION_CLASSES': [
         'rest_framework.permissions.IsAuthenticated',
-    ]
+    ],
+    'DEFAULT_THROTTLE_CLASSES': [
+        'rest_framework.throttling.AnonRateThrottle',
+        'rest_framework.throttling.UserRateThrottle',
+    ],
+    'DEFAULT_THROTTLE_RATES': {
+        'anon': '10/hour',  # Unauthenticated users can make 10 requests per hour
+        'user': '20/hour',  # Authenticated users can make 20 requests per hour
+        'login': '5/minute',  # Custom throttling rate for login attempts
+    },
 }
 
 
