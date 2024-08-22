@@ -1,6 +1,7 @@
 from django.contrib.auth.models import User
 from rest_framework import serializers
 from rest_framework.validators import UniqueValidator, UniqueTogetherValidator
+from django.contrib.auth.password_validation import validate_password
 
 from sidelines_django_app.models import Profile
 from sidelines_django_app.serializers.ProfileSerializer import ProfileSerializer
@@ -11,14 +12,8 @@ class UserSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True, required=True, style={'input_type': 'password'})
     profile = ProfileSerializer()
 
-    @staticmethod
-    def validate_password(value):
-        if len(value) < 8:
-            raise serializers.ValidationError('Password must be at least 8 characters long.')
-        if not any(char.isdigit() for char in value):
-            raise serializers.ValidationError('Password must contain at least one digit.')
-        if not any(char.isalpha() for char in value):
-            raise serializers.ValidationError('Password must contain at least one letter.')
+    def validate_password(self, value):
+        validate_password(value, self.instance)
         return value
 
     def create(self, validated_data):
