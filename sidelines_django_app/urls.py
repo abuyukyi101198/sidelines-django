@@ -1,10 +1,12 @@
 from django.urls import path
 from .views import *
+from .views.SignUpView import username_unique_check
 
 app_name = 'api'
 urlpatterns = [
     path('signup/', SignUpView.as_view(), name='sign-up'),
     path('signin/', SignInView.as_view(), name='sign-in'),
+    path('username-unique-check/', username_unique_check, name='username-unique-check'),
 
     path('users/', UserRecordView.as_view(), name='user-list'),
     path('users/<int:user_id>/', UserRecordView.as_view(), name='user-detail'),
