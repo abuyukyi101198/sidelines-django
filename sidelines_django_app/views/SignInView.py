@@ -5,6 +5,7 @@ from rest_framework.authtoken.models import Token
 from rest_framework.permissions import AllowAny
 from rest_framework.throttling import ScopedRateThrottle
 from django.contrib.auth import authenticate
+from django.contrib.auth.models import User
 
 
 class SignInView(APIView):
@@ -13,9 +14,16 @@ class SignInView(APIView):
     throttle_scope = 'login'
 
     def post(self, request):
-        username = request.data.get('username')
+        identifier = request.data.get('username')
         password = request.data.get('password')
-        user = authenticate(username=username, password=password)
+        user = authenticate(username=identifier, password=password)
+
+        if user is None:
+            try:
+                user_obj = User.objects.get(email=identifier)
+                user = authenticate(username=user_obj.username, password=password)
+            except User.DoesNotExist:
+                pass
 
         if user is not None:
             token, created = Token.objects.get_or_create(user=user)
