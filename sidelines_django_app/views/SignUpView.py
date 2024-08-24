@@ -1,8 +1,9 @@
 from django.contrib.auth.models import User
 from rest_framework import status
+from rest_framework.authentication import TokenAuthentication
 from rest_framework.authtoken.models import Token
-from rest_framework.decorators import api_view, permission_classes
-from rest_framework.permissions import AllowAny
+from rest_framework.decorators import api_view, permission_classes, authentication_classes
+from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
@@ -22,7 +23,8 @@ class SignUpView(APIView):
 
 
 @api_view(['POST'])
-@permission_classes([AllowAny])  # This will not conflict now
+@authentication_classes([TokenAuthentication])
+@permission_classes([IsAuthenticated])
 def username_unique_check(request):
     username = request.data.get('username')
     if username is None:
