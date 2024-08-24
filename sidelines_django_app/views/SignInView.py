@@ -1,11 +1,11 @@
-from rest_framework.views import APIView
-from rest_framework.response import Response
+from django.contrib.auth import authenticate
+from django.contrib.auth.models import User
 from rest_framework import status
 from rest_framework.authtoken.models import Token
 from rest_framework.permissions import AllowAny
+from rest_framework.response import Response
 from rest_framework.throttling import ScopedRateThrottle
-from django.contrib.auth import authenticate
-from django.contrib.auth.models import User
+from rest_framework.views import APIView
 
 
 class SignInView(APIView):
@@ -27,5 +27,9 @@ class SignInView(APIView):
 
         if user is not None:
             token, created = Token.objects.get_or_create(user=user)
-            return Response({'token': token.key}, status=status.HTTP_200_OK)
+            profile = user.profile
+            if profile.setup_complete:
+                return Response({'token': token.key}, status=status.HTTP_200_OK)
+            else:
+                return Response({'token': token.key}, status=status.HTTP_206_PARTIAL_CONTENT)
         return Response({'error': 'Invalid credentials'}, status=status.HTTP_400_BAD_REQUEST)

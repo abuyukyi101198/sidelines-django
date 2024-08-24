@@ -20,6 +20,7 @@ class Profile(models.Model):
     assists = models.IntegerField(default=0)
     mvp = models.IntegerField(default=0)
     join_date = models.DateField(auto_now_add=True)
+    setup_complete = models.BooleanField(default=False)
 
     def unfriend(self, other_profile):
         if self.friends.filter(pk=other_profile.pk).exists():
