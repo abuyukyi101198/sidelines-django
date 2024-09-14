@@ -10,5 +10,7 @@ class ProfileSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Profile
-        fields = ('overall_rating', 'position', 'kit_number', 'friends', 'teams', 'admin_teams', 'join_date',)
+        fields = (
+            'overall_rating', 'positions', 'kit_number', 'friends', 'teams', 'admin_teams', 'join_date',
+            'date_of_birth',)
         read_only_fields = ('overall_rating', 'join_date',)
