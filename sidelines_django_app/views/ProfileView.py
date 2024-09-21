@@ -11,6 +11,12 @@ class ProfileView(APIView):
     authentication_classes = [TokenAuthentication]
     permission_classes = [IsAuthenticated]
 
+    def get(self, request):
+        profile = request.user.profile
+        serializer = ProfileSerializer(profile)
+        print(serializer.data)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
     def patch(self, request):
         user = request.user
         user_serializer = UserSerializer(user, data=request.data, partial=True)
