@@ -1,4 +1,3 @@
-import django.utils.timezone
 from django.contrib.auth.models import User
 from django.core.validators import MinValueValidator, MaxValueValidator
 from django.db import models
@@ -16,6 +15,7 @@ class Profile(models.Model):
     join_date = models.DateField(auto_now_add=True)
     setup_complete = models.BooleanField(default=False)
     date_of_birth = models.DateField(default=None, null=True, blank=True)
+    profile_picture = models.ImageField(upload_to='profile_pictures/', null=True, blank=True)
 
     def unfriend(self, other_profile):
         if self.friends.filter(pk=other_profile.pk).exists():
