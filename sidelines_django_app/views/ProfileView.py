@@ -13,8 +13,7 @@ class ProfileView(APIView):
 
     def get(self, request):
         profile = request.user.profile
-        serializer = ProfileSerializer(profile)
-        print(serializer.data)
+        serializer = ProfileSerializer(profile, context={'request': request})
         return Response(serializer.data, status=status.HTTP_200_OK)
 
     def patch(self, request):

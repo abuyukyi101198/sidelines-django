@@ -12,10 +12,18 @@ class ProfileSerializer(serializers.ModelSerializer):
     teams = serializers.PrimaryKeyRelatedField(many=True, queryset=Team.objects.all(), required=False)
     admin_teams = serializers.PrimaryKeyRelatedField(many=True, queryset=Team.objects.all(), required=False)
 
+    profile_picture = serializers.SerializerMethodField()
+
     class Meta:
         model = Profile
         fields = (
             'first_name', 'last_name', 'username', 'overall_rating', 'positions', 'kit_number', 'friends',
-            'teams', 'admin_teams', 'join_date', 'date_of_birth', 'goals', 'assists', 'mvp',
+            'teams', 'admin_teams', 'join_date', 'date_of_birth', 'goals', 'assists', 'mvp', 'profile_picture'
         )
         read_only_fields = ('first_name', 'last_name', 'username', 'overall_rating', 'join_date',)
+
+    def get_profile_picture(self, obj):
+        request = self.context.get('request')
+        if obj.profile_picture and hasattr(obj.profile_picture, 'url'):
+            return request.build_absolute_uri(obj.profile_picture.url)
+        return None
