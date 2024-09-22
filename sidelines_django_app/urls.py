@@ -11,6 +11,7 @@ urlpatterns = [
     path('users/', UserRecordView.as_view(), name='user-list'),
     path('users/<int:user_id>/', UserRecordView.as_view(), name='user-detail'),
     path('profile/', ProfileView.as_view(), name='profile'),
+    path('upload-profile-picture/', ProfilePictureUploadView.as_view(), name='upload-profile-picture'),
 
     path('friend-requests/', FriendRequestView.as_view(), name='create-friend-request'),
     path('friend-requests/<int:request_id>/', FriendRequestView.as_view(), name='friend-request-detail'),

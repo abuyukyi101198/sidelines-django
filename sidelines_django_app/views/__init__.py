@@ -7,3 +7,4 @@ from .TeamInvitationView import TeamInvitationView
 from .MatchView import MatchView
 from .MatchInvitationView import MatchInvitationView
 from .ProfileView import ProfileView
+from .ProfilePictureUploadView import ProfilePictureUploadView
