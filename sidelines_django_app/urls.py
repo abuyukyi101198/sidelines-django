@@ -8,8 +8,6 @@ urlpatterns = [
     path('signin/', SignInView.as_view(), name='sign-in'),
     path('username-unique-check/', username_unique_check, name='username-unique-check'),
 
-    path('users/', UserRecordView.as_view(), name='user-list'),
-    path('users/<int:user_id>/', UserRecordView.as_view(), name='user-detail'),
     path('profile/', ProfileView.as_view(), name='profile'),
     path('upload-profile-picture/', ProfilePictureUploadView.as_view(), name='upload-profile-picture'),
 

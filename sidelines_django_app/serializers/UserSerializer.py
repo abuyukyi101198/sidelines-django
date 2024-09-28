@@ -4,7 +4,7 @@ from rest_framework.validators import UniqueValidator
 from django.contrib.auth.password_validation import validate_password
 
 from sidelines_django_app.models import Profile
-from sidelines_django_app.serializers.ProfileSerializer import ProfileSerializer
+from sidelines_django_app.serializers.profile import ProfileSerializer
 
 
 class UserSerializer(serializers.ModelSerializer):
