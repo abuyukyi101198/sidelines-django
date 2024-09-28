@@ -1,10 +1,10 @@
-from .SignInView import SignInView
-from .SignUpView import SignUpView
+from sidelines_django_app.views.authentication.SignUpView import SignUpView
 from .FriendRequestView import FriendRequestView
-from .UserRecordView import UserRecordView
 from .TeamView import TeamView
 from .TeamInvitationView import TeamInvitationView
 from .MatchView import MatchView
 from .MatchInvitationView import MatchInvitationView
 from .ProfileView import ProfileView
-from .ProfilePictureUploadView import ProfilePictureUploadView
+from .FriendsView import FriendsView
+
+from .authentication import *
