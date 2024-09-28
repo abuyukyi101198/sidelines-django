@@ -1,8 +1,12 @@
+import logging
 from django.contrib.auth.models import User
 from rest_framework import status
 from rest_framework.authtoken.models import Token
 from rest_framework.test import APIClient, APITestCase
 from sidelines_django_app.models import Profile
+
+logging.basicConfig(level=logging.DEBUG)
+logger = logging.getLogger(__name__)
 
 class SignInViewTests(APITestCase):
     def setUp(self):
@@ -18,6 +22,7 @@ class SignInViewTests(APITestCase):
 
         # Create token for user1
         self.token1 = Token.objects.create(user=self.user1)
+        logger.info('Setup complete')
 
     def test_sign_in_with_username_success(self):
         """
@@ -25,11 +30,15 @@ class SignInViewTests(APITestCase):
         """
         url = '/api/signin/'
         data = {'username': 'user1', 'password': 'testpassword'}
+        logger.info('Testing sign-in with username: %s', data['username'])
 
         response = self.client.post(url, data)
+        logger.debug('Response: %s', response.data)
+
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertIn('token', response.data)
         self.assertEqual(response.data['token'], self.token1.key)
+        logger.info('test_sign_in_with_username_success passed')
 
     def test_sign_in_with_email_success(self):
         """
@@ -37,11 +46,15 @@ class SignInViewTests(APITestCase):
         """
         url = '/api/signin/'
         data = {'username': 'user1@example.com', 'password': 'testpassword'}
+        logger.info('Testing sign-in with email: %s', data['username'])
 
         response = self.client.post(url, data)
+        logger.debug('Response: %s', response.data)
+
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertIn('token', response.data)
         self.assertEqual(response.data['token'], self.token1.key)
+        logger.info('test_sign_in_with_email_success passed')
 
     def test_sign_in_partial_profile(self):
         """
@@ -49,12 +62,16 @@ class SignInViewTests(APITestCase):
         """
         url = '/api/signin/'
         data = {'username': 'user2', 'password': 'testpassword'}
+        logger.info('Testing sign-in with partial profile for user: %s', data['username'])
 
         response = self.client.post(url, data)
+        logger.debug('Response: %s', response.data)
+
         self.assertEqual(response.status_code, status.HTTP_206_PARTIAL_CONTENT)
         self.assertIn('token', response.data)
         token = Token.objects.get(user=self.user2)
         self.assertEqual(response.data['token'], token.key)
+        logger.info('test_sign_in_partial_profile passed')
 
     def test_sign_in_invalid_credentials(self):
         """
@@ -62,11 +79,15 @@ class SignInViewTests(APITestCase):
         """
         url = '/api/signin/'
         data = {'username': 'user1', 'password': 'wrongpassword'}
+        logger.info('Testing sign-in with invalid credentials for user: %s', data['username'])
 
         response = self.client.post(url, data)
+        logger.debug('Response: %s', response.data)
+
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertIn('error', response.data)
         self.assertEqual(response.data['error'], 'Invalid credentials')
+        logger.info('test_sign_in_invalid_credentials passed')
 
     def test_sign_in_nonexistent_user(self):
         """
@@ -74,8 +95,12 @@ class SignInViewTests(APITestCase):
         """
         url = '/api/signin/'
         data = {'username': 'nonexistentuser', 'password': 'testpassword'}
+        logger.info('Testing sign-in with nonexistent user: %s', data['username'])
 
         response = self.client.post(url, data)
+        logger.debug('Response: %s', response.data)
+
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertIn('error', response.data)
         self.assertEqual(response.data['error'], 'Invalid credentials')
+        logger.info('test_sign_in_nonexistent_user passed')
