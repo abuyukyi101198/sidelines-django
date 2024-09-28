@@ -1,4 +1,7 @@
-from .UserRecordViewTests import UserRecordViewTests
+from .SignUpViewTests import SignUpViewTests
+from .SignInViewTests import SignInViewTests
+from .SignUpViewTests import UsernameUniqueCheckTests
+
 from .FriendRequestViewTests import FriendRequestViewTests
 from .TeamViewTests import TeamViewTests
 from .TeamInvitationViewTests import TeamInvitationViewTests
