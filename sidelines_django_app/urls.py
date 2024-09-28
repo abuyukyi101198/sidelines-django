@@ -1,6 +1,6 @@
 from django.urls import path
 from .views import *
-from .views.SignUpView import username_unique_check
+from sidelines_django_app.views.authentication.SignUpView import username_unique_check
 
 app_name = 'api'
 urlpatterns = [
@@ -9,7 +9,8 @@ urlpatterns = [
     path('username-unique-check/', username_unique_check, name='username-unique-check'),
 
     path('profile/', ProfileView.as_view(), name='profile'),
-    path('upload-profile-picture/', ProfilePictureUploadView.as_view(), name='upload-profile-picture'),
+    path('profile/<int:pk>/', ProfileView.as_view(), name='profile'),
+    path('profile/friends/', FriendsView.as_view(), name='profile-friends'),
 
     path('friend-requests/', FriendRequestView.as_view(), name='create-friend-request'),
     path('friend-requests/<int:request_id>/', FriendRequestView.as_view(), name='friend-request-detail'),
@@ -38,4 +39,17 @@ urlpatterns = [
     path('matches/<int:match_id>/', MatchView.as_view(), name='match-detail'),
 
     path('matches/vote/<int:match_id>/', MatchView.vote, name='vote'),
+]
+
+urlpatterns_new = [
+    'sign-up', # POST
+    'sign-in', # POST
+    'sign-out', # POST
+
+    'profile', # PUT | DELETE - ProfileSetupSerializer, ProfileEditSerializer
+    'profile/<int:profile_id>', # GET - ProfileSerializer
+    'profile/friends', # GET - FriendsSerializer
+
+    'profile/matches', # GET - MatchesSerializer
+    'profile/teams', # GET - TeamsSerializer
 ]
