@@ -10,6 +10,7 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/4.2/ref/settings/
 """
 import os
+import sys
 from pathlib import Path
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -130,6 +131,13 @@ REST_FRAMEWORK = {
         'login': '5/minute',  # Custom throttling rate for login attempts
     },
 }
+
+if 'test' in sys.argv:
+    REST_FRAMEWORK['DEFAULT_THROTTLE_RATES'] = {
+        'anon': '1000/minute',
+        'user': '1000/minute',
+        'login': '1000/minute',
+    }
 
 # Internationalization
 # https://docs.djangoproject.com/en/4.2/topics/i18n/
