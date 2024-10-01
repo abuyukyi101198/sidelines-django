@@ -4,8 +4,8 @@ from sidelines_django_app.views.authentication.SignUpView import username_unique
 
 app_name = 'api'
 urlpatterns = [
-    path('signup/', SignUpView.as_view(), name='sign-up'),
-    path('signin/', SignInView.as_view(), name='sign-in'),
+    path('sign-up/', SignUpView.as_view(), name='sign-up'),
+    path('sign-in/', SignInView.as_view(), name='sign-in'),
     path('username-unique-check/', username_unique_check, name='username-unique-check'),
 
     path('profile/', ProfileView.as_view(), name='profile'),

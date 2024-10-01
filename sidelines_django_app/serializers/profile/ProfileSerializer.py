@@ -16,10 +16,15 @@ class ProfileSerializer(serializers.ModelSerializer):
         'first_name', 'last_name', 'username', 'profile_picture', 'overall_rating', 'positions', 'kit_number', 'goals',
         'assists', 'mvp', 'date_of_birth', 'join_date',
         )
-        read_only_fields = '__all__'
 
     def get_profile_picture(self, obj):
         request = self.context.get('request')
         if obj.profile_picture and hasattr(obj.profile_picture, 'url'):
             return request.build_absolute_uri(obj.profile_picture.url)
         return None
+
+    def get_fields(self):
+        fields = super().get_fields()
+        for field in fields.values():
+            field.read_only = True
+        return fields
