@@ -6,6 +6,7 @@ from rest_framework.views import APIView
 
 from sidelines_django_app.serializers import UserSerializer
 from sidelines_django_app.serializers.profile import ProfileSerializer, ProfileSetupSerializer
+from sidelines_django_app.serializers.profile.ProfilePictureSerializer import ProfilePictureSerializer
 
 
 class ProfileView(APIView):
@@ -38,5 +39,6 @@ class ProfileView(APIView):
             profile_serializer.save()
             profile.setup_complete = True
             profile.save()
-            return Response(profile_serializer.data, status=status.HTTP_200_OK)
+            profile_picture_serializer = ProfilePictureSerializer(profile, context={'request': request})
+            return Response(profile_picture_serializer.data, status=status.HTTP_200_OK)
         return Response(profile_serializer.errors, status=status.HTTP_400_BAD_REQUEST)

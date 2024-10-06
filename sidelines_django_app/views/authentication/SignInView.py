@@ -7,6 +7,8 @@ from rest_framework.response import Response
 from rest_framework.throttling import ScopedRateThrottle
 from rest_framework.views import APIView
 
+from sidelines_django_app.serializers.profile.ProfilePictureSerializer import ProfilePictureSerializer
+
 
 class SignInView(APIView):
     permission_classes = [AllowAny]
@@ -28,8 +30,10 @@ class SignInView(APIView):
         if user is not None:
             token, created = Token.objects.get_or_create(user=user)
             profile = user.profile
+            profile_picture_serializer = ProfilePictureSerializer(profile, context={'request': request})
             if profile.setup_complete:
-                return Response({'token': token.key}, status=status.HTTP_200_OK)
+                return Response({'profile': profile_picture_serializer.data, 'token': token.key},
+                                status=status.HTTP_200_OK)
             else:
                 return Response({'token': token.key}, status=status.HTTP_206_PARTIAL_CONTENT)
         return Response({'error': 'Invalid credentials'}, status=status.HTTP_400_BAD_REQUEST)
