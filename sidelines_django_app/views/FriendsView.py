@@ -14,6 +14,6 @@ class FriendsView(APIView):
     @staticmethod
     def get(request):
         profile = request.user.profile
-        serializer = FriendListSerializer(profile.friends.all(), context={'request': request})
+        serializer = FriendListSerializer(profile, context={'request': request})
 
         return Response(serializer.data, status=status.HTTP_200_OK)

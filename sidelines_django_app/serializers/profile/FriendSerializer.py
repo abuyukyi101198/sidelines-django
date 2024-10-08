@@ -14,9 +14,8 @@ class FriendSerializer(serializers.ModelSerializer):
     class Meta:
         model = Profile
         fields = (
-            'id', 'first_name', 'last_name', 'profile_picture', 'positions',
+            'id', 'first_name', 'last_name', 'profile_picture', 'positions', 'is_teammate'
         )
-        read_only_fields = '__all__'
 
     def get_profile_picture(self, obj):
         request = self.context.get('request')
@@ -32,3 +31,9 @@ class FriendSerializer(serializers.ModelSerializer):
         common_teams = user_teams & friend_teams
 
         return common_teams.exists()
+
+    def get_fields(self):
+        fields = super().get_fields()
+        for field in fields.values():
+            field.read_only = True
+        return fields
