@@ -4,6 +4,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
+from sidelines_django_app.models import Profile
 from sidelines_django_app.serializers import UserSerializer
 from sidelines_django_app.serializers.profile import ProfileSerializer, ProfileSetupSerializer
 from sidelines_django_app.serializers.profile.ProfilePictureSerializer import ProfilePictureSerializer
@@ -19,7 +20,8 @@ class ProfileView(APIView):
         if pk is None:
             serializer = ProfileSerializer(profile, context={'request': request})
         else:
-            serializer = ProfileSerializer(pk=pk, context={'request': request})
+            other_profile = Profile.objects.get(pk=pk)
+            serializer = ProfileSerializer(other_profile, context={'request': request})
 
         return Response(serializer.data, status=status.HTTP_200_OK)
 
