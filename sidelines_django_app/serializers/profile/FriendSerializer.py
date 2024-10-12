@@ -4,6 +4,7 @@ from sidelines_django_app.models import Profile, Team
 
 
 class FriendSerializer(serializers.ModelSerializer):
+    username = serializers.CharField(source='user.username', read_only=True)
     first_name = serializers.CharField(source='user.first_name', read_only=True)
     last_name = serializers.CharField(source='user.last_name', read_only=True)
 
@@ -14,7 +15,7 @@ class FriendSerializer(serializers.ModelSerializer):
     class Meta:
         model = Profile
         fields = (
-            'id', 'first_name', 'last_name', 'profile_picture', 'positions', 'is_teammate'
+            'id', 'username', 'first_name', 'last_name', 'profile_picture', 'positions', 'is_teammate'
         )
 
     def get_profile_picture(self, obj):
