@@ -1,3 +1,4 @@
+from django.db.models import Q
 from rest_framework import status
 from rest_framework.authentication import TokenAuthentication
 from rest_framework.permissions import IsAuthenticated
@@ -18,8 +19,13 @@ class ProfileSearchView(APIView):
         if not query:
             return Response({'detail': 'Query parameter is required.'}, status=status.HTTP_400_BAD_REQUEST)
 
-        profiles = Profile.objects.filter(user__username__icontains=query) | Profile.objects.filter(
-            user__first_name__icontains=query) | Profile.objects.filter(user__last_name__icontains=query)
+        current_user_profile = Profile.objects.filter(user=request.user).first()
+
+        profiles = Profile.objects.filter(
+            (Q(user__username__icontains=query) |
+            Q(user__first_name__icontains=query) |
+            Q(user__last_name__icontains=query))
+        ).exclude(id=current_user_profile.id)
 
         serializer = FriendSerializer(profiles, many=True, context={'request': request})
         return Response(serializer.data, status=status.HTTP_200_OK)
