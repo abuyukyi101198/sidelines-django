@@ -12,6 +12,7 @@ urlpatterns = [
     path('profile/', ProfileView.as_view(), name='profile'),
     path('profile/<int:pk>/', ProfileView.as_view(), name='profile'),
     path('profile/friends/', FriendsView.as_view(), name='profile-friends'),
+    path('profile/search/', ProfileSearchView.as_view(), name='profile-search'),
 
     path('friend-requests/', FriendRequestView.as_view(), name='create-friend-request'),
     path('friend-requests/<int:request_id>/', FriendRequestView.as_view(), name='friend-request-detail'),

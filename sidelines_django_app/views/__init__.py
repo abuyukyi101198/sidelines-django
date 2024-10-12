@@ -6,5 +6,6 @@ from .MatchView import MatchView
 from .MatchInvitationView import MatchInvitationView
 from .ProfileView import ProfileView
 from .FriendsView import FriendsView
+from .ProfileSearchView import ProfileSearchView
 
 from .authentication import *
