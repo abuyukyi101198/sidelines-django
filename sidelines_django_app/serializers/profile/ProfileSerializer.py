@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from sidelines_django_app.models import Profile
+from sidelines_django_app.models import Profile, FriendRequest
 
 
 class ProfileSerializer(serializers.ModelSerializer):
@@ -27,7 +27,11 @@ class ProfileSerializer(serializers.ModelSerializer):
 
     def get_is_friends(self, obj):
         request = self.context.get('request')
-        return obj in request.user.profile.friends.all()
+        if obj in request.user.profile.friends.all():
+            return 'connected'
+        elif FriendRequest.objects.filter(from_profile=request.user.profile, to_profile=obj).exists():
+            return 'pending'
+        return 'not connected'
 
     def get_fields(self):
         fields = super().get_fields()
