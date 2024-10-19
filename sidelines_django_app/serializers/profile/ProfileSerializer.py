@@ -10,11 +10,13 @@ class ProfileSerializer(serializers.ModelSerializer):
 
     profile_picture = serializers.SerializerMethodField()
 
+    is_friends = serializers.SerializerMethodField()
+
     class Meta:
         model = Profile
         fields = (
         'first_name', 'last_name', 'username', 'profile_picture', 'overall_rating', 'positions', 'kit_number', 'goals',
-        'assists', 'mvp', 'date_of_birth', 'join_date',
+        'assists', 'mvp', 'date_of_birth', 'join_date', 'is_friends',
         )
 
     def get_profile_picture(self, obj):
@@ -22,6 +24,10 @@ class ProfileSerializer(serializers.ModelSerializer):
         if obj.profile_picture and hasattr(obj.profile_picture, 'url'):
             return request.build_absolute_uri(obj.profile_picture.url)
         return None
+
+    def get_is_friends(self, obj):
+        request = self.context.get('request')
+        return obj in request.user.profile.friends.all()
 
     def get_fields(self):
         fields = super().get_fields()
