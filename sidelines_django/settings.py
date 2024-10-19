@@ -127,7 +127,7 @@ REST_FRAMEWORK = {
     ],
     'DEFAULT_THROTTLE_RATES': {
         'anon': '10/hour',  # Unauthenticated users can make 10 requests per hour
-        'user': '20/hour',  # Authenticated users can make 20 requests per hour
+        'user': '200/hour',  # Authenticated users can make 20 requests per hour
         'login': '5/minute',  # Custom throttling rate for login attempts
     },
 }
